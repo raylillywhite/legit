@@ -60,7 +60,7 @@ settings.config_defaults = (
     ('check_for_updates', True,
         'Are update checks allowed? Defaults to True.'),
 
-    ('allow_black_foreground', True,
+    ('allow_black_foreground', False,
         'Is the epic black foreground color allowed? Defaults to True.'),
 
     ('git_transparency', False,

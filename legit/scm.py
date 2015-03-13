@@ -11,7 +11,6 @@ import os
 import sys
 import subprocess
 from collections import namedtuple
-from exceptions import ValueError
 from operator import attrgetter
 
 from git import Repo
@@ -44,12 +43,12 @@ def abort(message, log=None):
 
 def repo_check(require_remote=False):
     if repo is None:
-        print 'Not a git repository.'
+        print('Not a git repository.')
         sys.exit(128)
 
     # TODO: no remote fail
     if not repo.remotes and require_remote:
-        print 'No git remotes configured. Please add one.'
+        print('No git remotes configured. Please add one.')
         sys.exit(128)
 
     # TODO: You're in a merge state.
@@ -61,11 +60,11 @@ def stash_it(sync=False):
     msg = 'syncing branch' if sync else 'switching branches'
 
     return repo.git.execute([git,
-        'stash', 'save',
+        'stash', 'save', '--include-untracked',
         LEGIT_TEMPLATE.format(msg)])
 
 
-def unstash_index(sync=False):
+def unstash_index(sync=False, branch=None):
     """Returns an unstash index if one is available."""
 
     repo_check()
@@ -73,10 +72,12 @@ def unstash_index(sync=False):
     stash_list = repo.git.execute([git,
         'stash', 'list'])
 
+    if branch is None:
+        branch = repo.head.ref.name
+
     for stash in stash_list.splitlines():
 
         verb = 'syncing' if sync else 'switching'
-        branch = repo.head.ref.name
 
         if (
             (('Legit' in stash) and
@@ -88,12 +89,12 @@ def unstash_index(sync=False):
         ):
             return stash[7]
 
-def unstash_it(sync=False):
+def unstash_it(sync=False, branch=None):
     """Unstashes changes from current branch for branch sync."""
 
     repo_check()
 
-    stash_index = unstash_index(sync=sync)
+    stash_index = unstash_index(sync=sync, branch=branch)
 
     if stash_index is not None:
         return repo.git.execute([git,
@@ -135,7 +136,7 @@ def smart_merge(branch, allow_rebase=True):
 
     try:
         return repo.git.execute([git, verb, branch])
-    except GitCommandError, why:
+    except GitCommandError as why:
         log = repo.git.execute([git,'merge', '--abort'])
         abort('Merge failed. Reverting.', log=why)
 
@@ -177,7 +178,7 @@ def graft_branch(branch):
     try:
         msg = repo.git.execute([git, 'merge', '--no-ff', branch])
         log.append(msg)
-    except GitCommandError, why:
+    except GitCommandError as why:
         log = repo.git.execute([git,'merge', '--abort'])
         abort('Merge failed. Reverting.', log='{0}\n{1}'.format(why, log))
 
@@ -208,14 +209,10 @@ def publish_branch(branch):
 def get_repo():
     """Returns the current Repo, based on path."""
 
-    work_path = subprocess.Popen([git, 'rev-parse', '--show-toplevel'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE).communicate()[0].rstrip('\n')
-
-    if work_path:
-        return Repo(work_path)
-    else:
-        return None
+    try:
+        return Repo()
+    except git.exc.InvalidGitRepositoryError:
+        pass
 
 
 def get_remote():
@@ -256,7 +253,7 @@ def get_branches(local=True, remote_branches=True):
                 name = '/'.join(b.name.split('/')[1:])
 
                 if name not in settings.forbidden_branches:
-                    branches.append(Branch(name, True))
+                    branches.append(Branch(name, is_published=True))
         except (IndexError, AssertionError):
             pass
 
@@ -267,7 +264,7 @@ def get_branches(local=True, remote_branches=True):
 
             if b not in [br.name for br in branches] or not remote_branches:
                 if b not in settings.forbidden_branches:
-                    branches.append(Branch(b, False))
+                    branches.append(Branch(b, is_published=False))
 
 
     return sorted(branches, key=attrgetter('name'))

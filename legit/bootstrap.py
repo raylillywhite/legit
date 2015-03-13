@@ -8,7 +8,7 @@ This module boostraps the Legit runtime.
 """
 
 
-import ConfigParser
+from six.moves import configparser
 
 
 import clint.textui.colored
@@ -31,12 +31,12 @@ except IOError:
 
 
 # Load existing configuration.
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.readfp(config_file)
 
 
 
-# Pouplate if needed.
+# Populate if needed.
 if not config.has_section('legit'):
     config.add_section('legit')
 

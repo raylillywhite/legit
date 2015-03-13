@@ -15,7 +15,7 @@ APP_SCRIPT = './legit_r'
 VERSION = '0.1.1'
 
 
-# Grab requirments.
+# Grab requirements.
 with open('reqs.txt') as f:
     required = f.readlines()
 
@@ -31,11 +31,7 @@ if sys.argv[-1] == 'publish':
 
 # Build Helper.
 if sys.argv[-1] == 'build':
-    try:
-        import py2exe
-    except ImportError:
-        print 'py2exe is required to continue.'
-        sys.exit(1)
+    import py2exe
 
     sys.argv.append('py2exe')
 

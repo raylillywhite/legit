@@ -11,7 +11,7 @@ The Concept
 
 `GitHub for Mac <http://mac.github.com>`_ is not just a Git client.
 
-This `comment <http://www.hackerne.ws/item?id=2684483>`_ on Hacker News
+This `comment <https://news.ycombinator.com/item?id=2684483>`_ on Hacker News
 says it best:
 
     They haven't re-created the git CLI tool in a GUI, they've created something different. They've created a tool that makes Git more accessible. Little things like auto-stashing when you switch branches will confuse git veterans, but it will make Git much easier to grok for newcomers because of the assumptions it makes about your Git workflow.
@@ -35,7 +35,7 @@ The Interface
     Defaults to current branch.
     Automatically stashes and unstashes any changes.
 
-``sprout <branch> <new-branch>``
+``sprout [<branch>] <new-branch>``
     Creates a new branch off of the specified branch.
     Swiches to it immediately.
 
@@ -59,7 +59,11 @@ The Interface
 The Installation
 ----------------
 
-Installing Legit is easy with pip::
+The easiest way to install legit is through homebrew::
+
+    $ brew install legit
+
+You can also install it with pip::
 
     $ pip install legit
 
